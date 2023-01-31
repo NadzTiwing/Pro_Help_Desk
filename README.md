@@ -1,4 +1,6 @@
-# sari-sari-store
-Simple Shopping site
-### Framework used:
-Vue JS
+# Ticket System
+Simple IT Ticketing System 
+
+### Tools used:
+React Native
+Expo
