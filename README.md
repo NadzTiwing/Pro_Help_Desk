@@ -4,3 +4,4 @@ Simple IT Ticketing System
 ### Tools used:
 React Native
 Expo
+Redux Saga
