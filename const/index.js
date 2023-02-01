@@ -19,7 +19,8 @@ export const layout = {
 export const color = {
     navy: "#13005A",
     primary: "#00337C",
+    secondary: "#E0E0E0",
     blue: "#1C82AD",
     green: "#03C988", 
-    light: "#f2f2f2"
+    light: "#f2f2f2",
 }

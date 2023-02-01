@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
         padding: 3
     },
     userBox: {
-        height: 150,
+        height: 130,
         borderTopWidth: 5,
         borderTopColor: color.green
     },
