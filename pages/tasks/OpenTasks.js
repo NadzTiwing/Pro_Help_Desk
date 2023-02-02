@@ -1,33 +1,42 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { 
     View, 
     Text, 
-    StyleSheet, 
-    TextInput, 
-    ScrollView, 
+    StyleSheet,
     TouchableOpacity, 
-    TouchableHighlight
+    TouchableHighlight,
+    Dimensions,
+    Animated
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
 import { SwipeListView } from 'react-native-swipe-list-view';
-import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { color, size } from "../../const";
+import TaskHeader from "../../components/TaskHeader";
+import { sortList } from "../../const";
+
+
+const rowTranslateAnimatedValues = {};
+Array(20)
+    .fill('')
+    .forEach((_, i) => {
+        rowTranslateAnimatedValues[`${i}`] = new Animated.Value(1);
+    });
 
 const OpenTasks = () => {
-    const [search, setSearch] = useState("");
-    const [sort, setSort] = useState("latest");
-    const [items, setItems] = useState([
-        { id: 1, text: 'Item 1' },
-        { id: 2, text: 'Item 2' },
-        { id: 3, text: 'Item 3' },
-        { id: 4, text: 'Item 4' },
-    ]);
-
     const [listData, setListData] = useState(
         Array(20)
-            .fill('')
-            .map((_, i) => ({ key: `${i}`, text: `item #${i}` }))
-    );
+        .fill('')
+        .map((_, i) => ({ key: `${i}`, text: `item #${i}` }))
+        );
+        
+    const indicatorText = () => {
+        return(
+            <React.Fragment>
+                <MaterialCommunityIcons name="chevron-triple-right" style={styles.swipeIcon} />
+                <Text style={styles.swipeText}>Swipe to assign to self</Text>
+            </React.Fragment>
+        );    
+    }
 
     const closeRow = (rowMap, rowKey) => {
         if (rowMap[rowKey]) {
@@ -48,15 +57,29 @@ const OpenTasks = () => {
     };
 
     const renderItem = data => (
-        <TouchableHighlight
-            onPress={() => console.log('You touched me')}
-            style={styles.rowFront}
-            underlayColor={'#AAA'}
+        <Animated.View
+            style={[
+                styles.rowFrontContainer,
+                {
+                    height: rowTranslateAnimatedValues[
+                        data.item.key
+                    ].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 50],
+                    }),
+                },
+            ]}
         >
-            <View>
-                <Text>I am {data.item.text} in a SwipeListView</Text>
-            </View>
-        </TouchableHighlight>
+            <TouchableHighlight
+                onPress={() => console.log('You touched me')}
+                style={styles.rowFront}
+                underlayColor={'#AAA'}
+            >
+                <View>
+                    <Text>I am {data.item.text} in a SwipeListView</Text>
+                </View>
+            </TouchableHighlight>
+        </Animated.View>
     );
 
     const renderHiddenItem = (data, rowMap) => (
@@ -83,33 +106,31 @@ const OpenTasks = () => {
         </View>
     );
 
+    const onSwipeValueChange = (swipeData) => {
+        const { key, value } = swipeData;
+        const isSureDelete = value+150 > Dimensions.get('window').width;
+        if (
+            isSureDelete 
+            && !this.animationIsRunning
+        ) {
+           this.animationIsRunning = true; //for smooth transition
+            Animated.timing(rowTranslateAnimatedValues[key], {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: false
+            }).start(() => {
+                const newData = [...listData];
+                const prevIndex = listData.findIndex(item => item.key === key);
+                newData.splice(prevIndex, 1);
+                setListData(newData);
+                this.animationIsRunning = false; //for smooth transition
+            });
+        }
+    };
+
     return(
         <View>
-            <View style={styles.searchSection}>
-                <FontAwesome name="search" style={styles.searchIcon} />
-                <TextInput 
-                    placeholder="Search..."
-                    value={search}
-                    onChange={(value)=>setSearch(value)}
-                />
-            </View>
-            <View style={styles.header}>
-                <View style={styles.indicator}>
-                    <MaterialCommunityIcons name="chevron-triple-right" style={styles.swipeIcon} />
-                    <Text style={styles.swipeText}>Swipe to assign to self</Text>
-                </View>
-                <View style={styles.sorter}>
-                    <Text style={styles.sortBy}>Sort by:</Text>
-                    <View style={styles.selection}>
-                        <Text style={styles.sortText}>{sort}</Text>
-                        <Picker selectedValue={sort} style={styles.sortSelection} onValueChange={(value, index) => setSort(value)}>
-                            <Picker.Item label="Latest" value="latest"/>
-                            <Picker.Item label="Priority" value="priority"/>
-                            {/* <Picker.Item label="Create Date" value="c"/> */}
-                        </Picker>
-                    </View>
-                </View>
-            </View>
+            <TaskHeader tabName="OpenTasks" sortList={sortList} indicator={indicatorText}/>
             <SwipeListView
                 data={listData}
                 renderItem={renderItem}
@@ -120,35 +141,14 @@ const OpenTasks = () => {
                 previewOpenValue={-40}
                 previewOpenDelay={3000}
                 onRowDidOpen={onRowDidOpen}
+                onSwipeValueChange={onSwipeValueChange}
+                useNativeDriver={false}
             />
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    searchSection: {
-        flexDirection: "row",
-        padding: 5,
-        // width: "100%",
-        backgroundColor: color.secondary
-    },
-    searchIcon: {
-        alignSelf: "center",
-        padding: 5,
-        color: "gray",
-        size: size.small
-    },
-    header: {
-        backgroundColor: color.light,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingLeft: 10,
-        paddingRight: 10,
-    },
-    indicator: {
-        flexDirection: "row",
-    },
     swipeIcon: {
         color: "gray",
         fontSize: size.medium
@@ -158,26 +158,6 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         paddingLeft: 3,
         color: "gray"
-    },
-    sorter: {
-        flexDirection: "row",
-    },
-    selection: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        backgroundColor: "white",
-        height: 20,
-        paddingLeft: 20,
-        marginLeft: 5,
-        borderRadius: 25 
-    },
-    sortBy: {
-        alignSelf: "center"
-    },
-    sortSelection: {
-        // height: 50,
-        alignSelf:"center",
-        width: 35,
     },
     backTextWhite: {
         color: '#FFF',

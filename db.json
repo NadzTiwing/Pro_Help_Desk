@@ -1,0 +1,41 @@
+{
+    "IT": [
+        { 
+            "id": 1,
+            "name": "Me",
+            "role": "main_focal"
+        },
+        { 
+            "id": 2,
+            "name": "Jose Rizal",
+            "role": "observer"
+        },
+        { 
+            "id": 3,
+            "name": "Bill Gates",
+            "role": "observer"
+        },
+        { 
+            "id": 4,
+            "name": "Elizabeth Zott",
+            "role": "main_focal"
+        },
+        { 
+            "id": 5,
+            "name": "Jane Austen",
+            "role": "main_focal"
+        },
+        { 
+            "id": 6,
+            "name": "Edmond Dantes",
+            "role": "main_focal"
+        },
+        { 
+            "id": 7,
+            "name": "Hedy Lamarr",
+            "role": "observer"
+        }
+    ],
+    
+    "tickets": []
+}
