@@ -1,8 +1,8 @@
 import actionType from "./ticket.type";
 
-export const createTicket = (datetime, title, issue, status) => ({
+export const createTicket = (datetime, title, issue, status, assignTo) => ({
     type: actionType.CREATE_TICKET,
-    datetime, title, issue, status  
+    datetime, title, issue, status, assignTo
 });
 
 export const createTicketSuccess = (data) => ({
@@ -23,18 +23,8 @@ export const getOpenTickets = () => ({
     type: actionType.GET_OPEN_TICKETS
 });
 
-export const getOpenTicketsSuccess = (data) => ({
-    type: actionType.GET_OPEN_TICKETS_SUCCESS,
-    data
-});
-
 export const getMyTickets = () => ({
     type: actionType.GET_MY_TICKETS
-});
-
-export const getMyTicketsSuccess = (data) => ({
-    type: actionType.GET_MY_TICKETS_SUCCESS,
-    data
 });
 
 export const viewTicket = (ticketId) => ({
@@ -42,38 +32,22 @@ export const viewTicket = (ticketId) => ({
     ticketId
 });
 
-export const viewTicketSuccess = (data) => ({
-    type: actionType.VIEW_TICKET_SUCCESS,
+export const viewAgents = () => ({
+    type: actionType.VIEW_AGENTS
+});
+
+export const viewAgentsSuccess = (data) => ({
+    type: actionType.VIEW_AGENTS_SUCCESS,
     data
 });
 
-export const assignToMe = (ticketId) => ({
-    type: actionType.ASSIGN_TO_ME,
-    ticketId
-});
+export const assignTicket = (ticketId, agentId) => ({
+    type: actionType.ASSIGN_TICKET,
+    ticketId, agentId
+}); 
 
-export const assignToMeSuccess = (data) => ({
-    type: actionType.ASSIGN_TO_ME,
-    data
-});
-
-export const assignToSomeone = (ticketId, userId) => ({
-    type: actionType.ASSIGN_TO_SOMEONE,
-    ticketId, userId
-});
-
-export const assignToSomeoneSuccess = (data) => ({
-    type: actionType.ASSIGN_TO_SOMEONE_SUCCESS,
-    data
-});
-
-export const reassignTicket = (ticketId, userId) => ({
-    type: actionType.REASSIGN_TICKET,
-    ticketId, userId
-});
-
-export const reassignTicketSuccess = (data) => ({
-    type: actionType.REASSIGN_TICKET_SUCCESS,
+export const assignTicketSuccess = (data) => ({
+    type: actionType.ASSIGN_TICKET_SUCCESS,
     data
 });
 

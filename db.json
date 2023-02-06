@@ -1,41 +1,89 @@
 {
-    "IT": [
-        { 
-            "id": 1,
-            "name": "Me",
-            "role": "main_focal"
-        },
-        { 
-            "id": 2,
-            "name": "Jose Rizal",
-            "role": "observer"
-        },
-        { 
-            "id": 3,
-            "name": "Bill Gates",
-            "role": "observer"
-        },
-        { 
-            "id": 4,
-            "name": "Elizabeth Zott",
-            "role": "main_focal"
-        },
-        { 
-            "id": 5,
-            "name": "Jane Austen",
-            "role": "main_focal"
-        },
-        { 
-            "id": 6,
-            "name": "Edmond Dantes",
-            "role": "main_focal"
-        },
-        { 
-            "id": 7,
-            "name": "Hedy Lamarr",
-            "role": "observer"
-        }
-    ],
-    
-    "tickets": []
+  "IT": [
+    {
+      "id": 1,
+      "name": "Me",
+      "role": "main_focal"
+    },
+    {
+      "id": 2,
+      "name": "Jose Rizal",
+      "role": "observer"
+    },
+    {
+      "id": 3,
+      "name": "Bill Gates",
+      "role": "observer"
+    },
+    {
+      "id": 4,
+      "name": "Elizabeth Zott",
+      "role": "main_focal"
+    },
+    {
+      "id": 5,
+      "name": "Jane Austen",
+      "role": "main_focal"
+    },
+    {
+      "id": 6,
+      "name": "Edmond Dantes",
+      "role": "main_focal"
+    },
+    {
+      "id": 7,
+      "name": "Hedy Lamarr",
+      "role": "observer"
+    }
+  ],
+  "tickets": [
+    {
+      "datetime": "2023-02-06T02:48:20.214Z",
+      "title": "My headphone not working",
+      "issue": "I hear nothing from my headphone.",
+      "status": "open",
+      "assignTo": null,
+      "id": 1
+    },
+    {
+      "datetime": "2023-02-06T02:49:29.657Z",
+      "title": "No access",
+      "issue": "I cannot access OA system. WIFI good, registered but I cannot login. I've been trying to access this specific website all day and it keeps saying that I'm unable to connect. I've tried from different devices and internet connections and still the same problem persists. It's so frustrating that I can't access the information I need because of this technical issue. I hope the website administrators can fix this issue quickly, because it's causing me so much inconvenience.",
+      "status": "priority",
+      "assignTo": null,
+      "id": 2
+    },
+    {
+      "datetime": "2023-02-06T02:50:12.294Z",
+      "title": "No mouse",
+      "issue": "I cannot work well. I have no mouse to use.",
+      "status": "open",
+      "assignTo": null,
+      "id": 3
+    },
+    {
+      "datetime": "2023-02-06T02:51:08.360Z",
+      "title": "Blue screen",
+      "issue": "Help. My screen is displaying blue screen. I didn't do anything.",
+      "status": "priority",
+      "assignTo": null,
+      "id": 4
+    },
+    {
+      "datetime": "2023-02-06T02:52:17.237Z",
+      "title": "Laggy app",
+      "issue": "I am annoyed how laggy the app is. I can't work quickly. I am so frustrated with this app! Every time I try to use it, I encounter endless bugs and glitches. The app keeps crashing and my information is not saving correctly. The user interface is confusing and makes it difficult to navigate. It's incredibly frustrating and wastes so much of my time. I really hope the developers can fix these issues soon, because as it stands now, this app is completely unusable.",
+      "status": "open",
+      "assignTo": null,
+      "id": 5
+    },
+    {
+      "datetime": "2023-02-06T02:53:39.809Z",
+      "title": "Not turning on",
+      "issue": "My PC is not turning on. Everything are plugged in. Still, the screen won't display anything. ",
+      "status": "priority",
+      "assignTo": null,
+      "id": 6
+    }
+  ]
 }
