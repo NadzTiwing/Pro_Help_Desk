@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { getAllTickets, assignTicket } from "../../redux/ticket/ticket.actions";
+import { getAllTickets, assignTicket, viewAgents } from "../../redux/ticket/ticket.actions";
 import { 
     View, 
     Text, 
@@ -29,20 +29,22 @@ const rowTranslateAnimatedValues = {};
 // });
 
 const OpenTasks = (props) => {
-    const [tickets, setTickets] = useState();
+    const [tickets, setTickets] = useState([]);
+    const [agents, setAgents] = useState([]);
     const [isLoading, setLoading] = useState(props.isLoading);
     const [dataLength, setDataLength] = useState(20);
     const [showModal, setShowModal] = useState(false);
-    
+    const [selectedIT, setSelectedIT] = useState(0);
+    const [assignTicketId, setAssignTicketId] = useState(0);
 
     useEffect(()=>{
-        setDataLength(dataLength);
-        Array(dataLength)
-        .fill('')
-        .forEach((_, i) => {
-            rowTranslateAnimatedValues[`${i}`] = new Animated.Value(1);
-        });
+        //get IT
+        props.getIT();
+        const supporters = props.data.agents.data || [];
+        const allExceptMe = supporters?.filter(agent => agent.id != 1);
+        setAgents(allExceptMe);
 
+        //get all open tickets
         props.getTickets();
         setLoading(props.isLoading);
         let data = props.data.tickets.data || [];
@@ -52,27 +54,34 @@ const OpenTasks = (props) => {
                 let desc = item.issue;
                 let textCount = item.issue.length;
                 if(textCount > 80) desc = item.issue.substring(0,80) + "...";
+                
+                const IT = supporters.find(agent => agent.id === item.assignTo);
+                let capitalizedRole = IT?.role.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 
                 let ticket = {
                     id: item.id,
                     title: item.title,
                     issue: desc,
                     status: item.status,
-                    assignTo: item.assignTo 
+                    assignTo: item.assignTo,
+                    agentName: IT?.name || "unassigned",
+                    agentRole: capitalizedRole || ""
                 };
 
                 openTickets.push(ticket);
             }
         })
         setTickets(openTickets);
-       // console.log(JSON.stringify(items));
-    },[props.isLoading, dataLength ]);
 
-    // const [listData, setListData] = useState(
-    //     Array(20)
-    //     .fill('')
-    //     .map((_, i) => ({ key: `${i}`, text: `item #${i}` }))
-    //     );
+        setDataLength(data.length);
+        // Array(data.length)
+        // .fill('')
+        // .forEach((_, i) => {
+        //     rowTranslateAnimatedValues[`${i}`] = new Animated.Value(1);
+        // });
+        
+        // console.log({LOADED_TICKETS: JSON.stringify(openTickets)});
+    },[props.isLoading, dataLength, props.data.agents.length ]);
         
     const indicatorText = () => {
         return(
@@ -83,17 +92,14 @@ const OpenTasks = (props) => {
         );    
     }
 
-    const assignMember = (ticketId, agent) => {
-        console.log({TICKET_ID_CLICKED: ticketId});
+    const delegate = () => {
         setShowModal(!showModal);
-        // if(agent === "me") {
-
-        // } else if(agent === "others") {
-
-        // } else { //re-assign to other members
-
-        // }
-    }
+        if(selectedIT) {
+            props.assign(assignTicketId, selectedIT);
+            setShowModal(!showModal);
+            setTickets(prevItems => prevItems.map(item => item.id === assignTicketId ? {...item, assignTo: selectedIT} : item))
+        }
+    } 
 
     const closeRow = (rowMap, rowId) => {
         if (rowMap[rowId]) {
@@ -113,6 +119,8 @@ const OpenTasks = (props) => {
         console.log("Ticket Opened:" +id);
     }
 
+    
+
     const renderItem = data => (
         <Animated.View
             style={[
@@ -120,7 +128,7 @@ const OpenTasks = (props) => {
                 {
                     height: "auto"
                     // height: rowTranslateAnimatedValues[
-                    //     data.item.id
+                    //     data.index.toString()
                     // ].interpolate({
                     //     inputRange: [0, 1],
                     //     outputRange: [0, 120],
@@ -128,17 +136,9 @@ const OpenTasks = (props) => {
                 },
             ]}
         >
-            {/* <TouchableHighlight
-                onPress={() => console.log('You touched me')}
-                style={styles.rowFront}
-                underlayColor={'#AAA'}
-            >
-                <View>
-                    <Text>{data.item.title}</Text>
-                </View>
-            </TouchableHighlight> */}
             <TouchableHighlight style={styles.rowFront} underlayColor={'#AAA'}>
                 <View>
+                    {/* <Text>{JSON.stringify(rowTranslateAnimatedValues[])}</Text> */}
                     <View style={styles.secondaryDetails}>
                         <Text>{data.item.id} . {data.item.status}</Text>
                         <Text>{dayjs(data.item.datetime).toString()}</Text>
@@ -152,10 +152,10 @@ const OpenTasks = (props) => {
                         <View style={styles.user}>
                             <FontAwesome name="user" size={size.xMedium} style={styles.userIcon}/>
                             <View style={styles.name}>
-                                <Text>{data.item.assignTo ? data.item.assignTo : "Unassigned"}</Text>
+                                <Text>{data.item.agentName}</Text>
                             </View>
                         </View>
-                        <Text style={styles.role}>Main Focal</Text>
+                        <Text style={styles.role}>{data.item.agentRole}</Text>
                     </View>
                 </View>
             </TouchableHighlight>
@@ -164,56 +164,63 @@ const OpenTasks = (props) => {
 
     const renderHiddenItem = (data, rowMap) => (
         <View style={styles.rowBack}>
-            <TouchableOpacity
+            <View
                 style={styles.backLeftBtn}
-                onPress={() => closeRow(rowMap, data.item.id)}
             >
                 <Text style={styles.assignSelfTxt}>Assign To Me</Text>
-            </TouchableOpacity>
+            </View>
             
             <TouchableOpacity
                 style={[styles.backRightBtn, styles.backRightBtnLeft]}
-                onPress={() => assignMember(data.item.id, "others")}
+                onPress={() => {
+                    setAssignTicketId(data.item.id);
+                    delegate();
+                }}
             >
                 <Text style={styles.backRightBtnTxt}>Assign Member</Text>
             </TouchableOpacity>
-            <TouchableOpacity
+            {/* <TouchableOpacity
                 style={[styles.backRightBtn, styles.backRightBtnRight]}
                 onPress={() => deleteRow(rowMap, data.item.id)}
             >
                 <Text style={styles.backRightBtnTxt}>Re-assign Group</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
         </View>
     );
 
     const onSwipeValueChange = (swipeData) => {
         const { key, value } = swipeData;
         const isSureDelete = value+150 > Dimensions.get('window').width;
-        // console.log({isSureDelete: JSON.stringify(swipeData)});
+        // // console.log({isSureDelete: JSON.stringify(swipeData)});
         if (
             isSureDelete 
             //!animationIsRunning.current
         ) {
+            //console.log({ANIMATION: JSON.stringify(rowTranslateAnimatedValues)});
             //animationIsRunning.current = true; //for smooth transition
-            Animated.timing(rowTranslateAnimatedValues[key], {
-                toValue: 0,
-                duration: 200,
-                useNativeDriver: false
-            }).start(() => {
-                console.log("swiped to left");
-                // const newData = [...tickets];
-                // const prevIndex = tickets.findIndex(item => item.id === key);
-                // newData.splice(prevIndex, 1);
-                // setTickets(newData);
-                //animationIsRunning.current = false; //for smooth transition
-            });
+            // Animated.timing(rowTranslateAnimatedValues[key], {
+            //     toValue: 0,
+            //     duration: 200,
+            //     useNativeDriver: false
+            // }).start(() => {
+            //     console.log("swiped to left");
+            //     // const newData = [...tickets];
+            //     // const prevIndex = tickets.findIndex(item => item.id === key);
+            //     // newData.splice(prevIndex, 1);
+            //     // setTickets(newData);
+            //     //animationIsRunning.current = false; //for smooth transition
+            // });
         }
     };
 
     return(
         <View>
             <TaskHeader tabName="OpenTasks" sortList={sortList} indicator={indicatorText}/>
-            <AgentsModal show={showModal}/>
+            <AgentsModal 
+            show={showModal} setShow={setShowModal} 
+            agents={agents} 
+            selected={selectedIT} setSelected={setSelectedIT} 
+            delegate={delegate}/>
             {isLoading ? 
             <ActivityIndicator size="large" />
             :
@@ -221,7 +228,7 @@ const OpenTasks = (props) => {
                 data={tickets}
                 renderItem={renderItem}
                 renderHiddenItem={renderHiddenItem}
-                leftOpenValue={75}
+                leftOpenValue={100}
                 rightOpenValue={-150}
                 previewRowKey={'0'}
                 previewOpenValue={-40}
@@ -264,7 +271,7 @@ const styles = StyleSheet.create({
     },
     rowBack: {
         alignItems: 'center',
-        backgroundColor: '#DDD',
+        backgroundColor: 'mediumseagreen',
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -277,7 +284,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 0,
         width: 100,
-        backgroundColor: "mediumseagreen"
     },
     assignSelfTxt: {
         fontWeight: "bold",
@@ -289,11 +295,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         position: 'absolute',
         top: 0,
-        width: 75,
+        // width: 75,
+        width: 150
     },
     backRightBtnLeft: {
         backgroundColor: 'orange',
-        right: 75,
+        // right: 75,
+        right: 0
     },
     backRightBtnRight: {
         backgroundColor: 'gold',
@@ -360,7 +368,8 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         getTickets: () => dispatch(getAllTickets()),
-        assign: (ticketId, agentId) => dispatch(assignTicket(ticketId, agentId))
+        assign: (ticketId, agentId) => dispatch(assignTicket(ticketId, agentId)),
+        getIT: () => dispatch(viewAgents())
     }
 }
 
